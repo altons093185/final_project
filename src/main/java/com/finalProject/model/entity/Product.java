@@ -2,10 +2,14 @@ package com.finalProject.model.entity;
 
 import java.time.LocalDateTime;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
@@ -76,4 +80,4 @@ public class Product {
 	    private Set<Category> categories = new HashSet<>();
 	}
 
-}
+

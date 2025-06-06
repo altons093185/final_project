@@ -34,7 +34,7 @@ public class ProductCrawlerService {
 
 	@PostConstruct
 	public void testRun() {
-		crawlCostcoHotBuys();
+		//		crawlCostcoHotBuys();
 	}
 
 	// 每天早上8點抓一次
@@ -57,7 +57,7 @@ public class ProductCrawlerService {
 		try {
 			while (true) {
 				if (page == 0) {
-					url = "https://www.costco.com.tw/c/hot-buys?page=3";
+					url = "https://www.costco.com.tw/c/hot-buys";
 					//					url = "https://www.costco.com.tw/c/hot-buys";
 				} else {
 					url = "https://www.costco.com.tw/c/hot-buys?page=" + page;
@@ -136,7 +136,7 @@ public class ProductCrawlerService {
 					//					System.out.println("小計: " + currentPrice);
 					System.out.println("庫存狀態: " + stockStatus);
 					count++;
-					//					productRepository.save(product);
+					productRepository.save(product);
 					System.out.println("已儲存商品：" + product.getNameZh());
 				}
 				page++;

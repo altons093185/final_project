@@ -9,8 +9,8 @@ import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
@@ -62,22 +62,16 @@ public class Product {
 	@Column(name = "created_at")
 	private LocalDateTime createdAt;
 
-	 @OneToMany(mappedBy = "product")
-	    private List<CartItem> cartItems = new ArrayList<>();
+	@OneToMany(mappedBy = "product")
+	private List<CartItem> cartItems = new ArrayList<>();
 
-	    @OneToMany(mappedBy = "product")
-	    private List<OrderItem> orderItems = new ArrayList<>();
+	@OneToMany(mappedBy = "product")
+	private List<OrderItem> orderItems = new ArrayList<>();
 
-	    @OneToMany(mappedBy = "product")
-	    private List<PriceSnapshot> priceSnapshots = new ArrayList<>();
+	@OneToMany(mappedBy = "product")
+	private List<PriceSnapshot> priceSnapshots = new ArrayList<>();
 
-	    @ManyToMany
-	    @JoinTable(
-	        name = "product_category",
-	        joinColumns = @JoinColumn(name = "product_id"),
-	        inverseJoinColumns = @JoinColumn(name = "category_id")
-	    )
-	    private Set<Category> categories = new HashSet<>();
-	}
-
-
+	@ManyToMany
+	@JoinTable(name = "product_category", joinColumns = @JoinColumn(name = "product_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
+	private Set<Category> categories = new HashSet<>();
+}

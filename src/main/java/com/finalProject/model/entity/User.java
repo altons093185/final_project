@@ -37,15 +37,22 @@ public class User {
 	@Column(nullable = false, unique = true)
 	private String email;
 
-	private String password;
+	@Column(name = "password")
+	private String hashPassword;
+
+	@Column(name = "hash_salt")
+	private String hashSalt;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "login_type", nullable = false)
-	private LoginType loginType;
+	private LoginType loginType = LoginType.LOCAL; // 預設為 EMAIL 登入
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private Role role;
+	private Role role = Role.USER;
+
+	@Column(name = "is_verified", nullable = false)
+	private Boolean isVerified = false;
 
 	@CreationTimestamp
 	@Column(name = "created_At", nullable = false)

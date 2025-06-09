@@ -13,6 +13,8 @@ import com.finalProject.model.entity.User;
 import com.finalProject.response.ApiResponse;
 import com.finalProject.service.UserService;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -31,16 +33,17 @@ public class AuthController {
 					.body(ApiResponse.error(HttpStatus.BAD_REQUEST, "註冊失敗: " + e.getMessage()));
 		}
 	}
+
+	@PostMapping("/login")
+	public ResponseEntity<?> login(HttpServletRequest request) {
+		return ResponseEntity.ok("登入成功（由 Spring Security 處理）");
+	}
+
 	//
-	//	@PostMapping("/login")
-	//	public ResponseEntity<?> login(HttpServletRequest request) {
-	//		return ResponseEntity.ok("登入成功（由 Spring Security 處理）");
-	//	}
-	//
-	//	@PostMapping("/logout")
-	//	public ResponseEntity<?> logout(HttpServletRequest request) {
-	//		request.getSession().invalidate();
-	//		return ResponseEntity.ok("登出成功");
-	//	}
+	@PostMapping("/logout")
+	public ResponseEntity<?> logout(HttpServletRequest request) {
+		//		request.getSession().invalidate();
+		return ResponseEntity.ok("登出成功");
+	}
 
 }

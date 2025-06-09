@@ -2,6 +2,8 @@ package com.finalProject.service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -17,6 +19,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.finalProject.model.dto.ProductDto;
 import com.finalProject.model.entity.Product;
 import com.finalProject.repository.ProductRepository;
 
@@ -34,7 +37,20 @@ public class ProductCrawlerService {
 
 	@PostConstruct
 	public void testRun() {
-		//		crawlCostcoHotBuys();
+//		crawlCostcoHotBuys();
+		shouldFindExistingProductById();
+	}
+
+	public void shouldFindExistingProductById() {
+
+		List<String> productIds = new ArrayList<>();
+		productIds.add("1010656");
+//		Map<String, Element> productIdToElement = new HashMap<>();
+
+		List<ProductDto> existingProducts = productRepository.findByProductIdIn(productIds);
+
+		System.out.println(existingProducts);
+		System.out.println("hi");
 	}
 
 	// 每天早上8點抓一次
@@ -45,7 +61,8 @@ public class ProductCrawlerService {
 		int count = 0;
 		System.out.println("🚀 開始 Costco 熱門優惠爬蟲");
 
-		//System.setProperty("webdriver.chrome.driver", "C:/chromedriver/chromedriver.exe"); // 改成你自己的路徑
+		// System.setProperty("webdriver.chrome.driver",
+		// "C:/chromedriver/chromedriver.exe"); // 改成你自己的路徑
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments("--headless", "--no-sandbox", "--disable-dev-shm-usage");
 
@@ -58,7 +75,7 @@ public class ProductCrawlerService {
 			while (true) {
 				if (page == 0) {
 					url = "https://www.costco.com.tw/c/hot-buys";
-					//					url = "https://www.costco.com.tw/c/hot-buys";
+					// url = "https://www.costco.com.tw/c/hot-buys";
 				} else {
 					url = "https://www.costco.com.tw/c/hot-buys?page=" + page;
 				}
@@ -69,9 +86,9 @@ public class ProductCrawlerService {
 
 				try {
 					wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("product-list-item")));
-					//					wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("discount-row-message")));
+					// wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("discount-row-message")));
 				} catch (TimeoutException e) {
-					System.out.println(e.getMessage());
+//					System.out.println(e.getMessage());
 					System.out.println("❌ 無商品內容，結束爬蟲！");
 					break;
 				}
@@ -87,6 +104,8 @@ public class ProductCrawlerService {
 					break;
 				}
 
+				List<Product> productsToSave = new ArrayList<>();
+
 				for (Element item : items) {
 					String nameZh = item.select(".js-lister-name .notranslate").text();
 					String nameEn = item.select(".lister-name-en").text();
@@ -101,7 +120,7 @@ public class ProductCrawlerService {
 
 					int discountPrice = parsePrice(discountPriceText); // 110
 					int currentPrice = parsePrice(currentPriceText); // 429
-					//	int originalPrice = currentPrice + discount; // 539
+					// int originalPrice = currentPrice + discount; // 539
 
 					// 產品 ID 從 href 取出（ex: /p/107056）
 					String href = item.select("a.js-lister-name").attr("href");
@@ -112,7 +131,7 @@ public class ProductCrawlerService {
 					product.setNameZh(nameZh);
 					product.setNameEn(nameEn);
 					product.setImgUrl(imageUrl);
-					//	product.setOriginalPrice(originalPrice);
+					// product.setOriginalPrice(originalPrice);
 					product.setDiscountAmount(discountPrice);
 					product.setCurrentPrice(currentPrice);
 					;
@@ -127,19 +146,22 @@ public class ProductCrawlerService {
 
 					System.out.println("===========");
 					System.out.println("商品 ID: " + productId);
-					//					System.out.println("商品名稱(中): " + nameZh);
-					//					System.out.println("商品名稱(英): " + nameEn);
-					//					System.out.println("商品圖片: " + imageUrl);
-					//					System.out.println("單價: " + unitPrice);
-					//					System.out.println("原價: " + originalPrice);
+					// System.out.println("商品名稱(中): " + nameZh);
+					// System.out.println("商品名稱(英): " + nameEn);
+					// System.out.println("商品圖片: " + imageUrl);
+					// System.out.println("單價: " + unitPrice);
+					// System.out.println("原價: " + originalPrice);
 					System.out.println("折扣: " + discountPrice);
-					//					System.out.println("小計: " + currentPrice);
+					// System.out.println("小計: " + currentPrice);
 					System.out.println("庫存狀態: " + stockStatus);
 					count++;
-					productRepository.save(product);
-					System.out.println("已儲存商品：" + product.getNameZh());
+
+					productsToSave.add(product);
+
+					System.out.println("已加入商品：" + product.getNameZh());
 				}
 				page++;
+				productRepository.saveAll(productsToSave);
 				System.out.println("目前商品數量: " + count);
 
 			}

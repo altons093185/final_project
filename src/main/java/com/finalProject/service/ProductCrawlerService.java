@@ -2,8 +2,11 @@ package com.finalProject.service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -16,11 +19,14 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.finalProject.model.dto.ProductDto;
+import com.finalProject.model.entity.Category;
 import com.finalProject.model.entity.Product;
+import com.finalProject.repository.CategoryRepository;
 import com.finalProject.repository.ProductRepository;
 
 import jakarta.annotation.PostConstruct;
@@ -31,21 +37,24 @@ public class ProductCrawlerService {
 
 	private final ProductRepository productRepository;
 
+	@Autowired
+	CategoryRepository categoryRepository;
+
 	public ProductCrawlerService(ProductRepository productRepository) {
 		this.productRepository = productRepository;
 	}
 
 	@PostConstruct
 	public void testRun() {
-//		crawlCostcoHotBuys();
-		shouldFindExistingProductById();
+		crawlCostcoHotBuys();
+		//		shouldFindExistingProductById();
 	}
 
 	public void shouldFindExistingProductById() {
 
 		List<String> productIds = new ArrayList<>();
 		productIds.add("1010656");
-//		Map<String, Element> productIdToElement = new HashMap<>();
+		//		Map<String, Element> productIdToElement = new HashMap<>();
 
 		List<ProductDto> existingProducts = productRepository.findByProductIdIn(productIds);
 
@@ -88,7 +97,7 @@ public class ProductCrawlerService {
 					wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("product-list-item")));
 					// wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("discount-row-message")));
 				} catch (TimeoutException e) {
-//					System.out.println(e.getMessage());
+					//					System.out.println(e.getMessage());
 					System.out.println("❌ 無商品內容，結束爬蟲！");
 					break;
 				}
@@ -105,6 +114,9 @@ public class ProductCrawlerService {
 				}
 
 				List<Product> productsToSave = new ArrayList<>();
+				Optional<Category> categoryOpt = categoryRepository.findByNameEn("hot-buys");
+				Integer categoryId = categoryOpt.get().getCategoryId();
+				Category category = categoryOpt.get();
 
 				for (Element item : items) {
 					String nameZh = item.select(".js-lister-name .notranslate").text();
@@ -143,6 +155,7 @@ public class ProductCrawlerService {
 					product.setIsInStock(stockStatus);
 					product.setLastSeenAt(now);
 					product.setSourceUrl("https://www.costco.com.tw/p/" + productId);
+					product.setCategories(Set.of(category));
 
 					System.out.println("===========");
 					System.out.println("商品 ID: " + productId);

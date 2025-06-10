@@ -24,12 +24,13 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+//@ToString(exclude = { "subCategories", "products", "parentId" })
 public class Category {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id", nullable = false)
-	private Integer catorgoryId;
+	private Integer categoryId;
 
 	@Column(name = "name_en", nullable = false, unique = true)
 	private String nameEn;

@@ -1,6 +1,6 @@
 package com.finalProject.exception;
 
-public class UserNotFoundException extends Exception {
+public class UserNotFoundException extends CertException {
 
 	public UserNotFoundException(String message) {
 		super(message);

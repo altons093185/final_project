@@ -7,6 +7,7 @@ import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -43,10 +44,10 @@ public class Category {
 	// 自我關聯 - 上層分類
 	@ManyToOne
 	@JoinColumn(name = "parent_id")
-	private Category parentId;
+	private Category parent;
 
 	// 自我關聯 - 下層分類（可選）
-	@OneToMany(mappedBy = "parentId")
+	@OneToMany(mappedBy = "parentId", fetch = FetchType.LAZY)
 	private List<Category> subCategories = new ArrayList<>();
 
 	@ManyToMany(mappedBy = "categories")

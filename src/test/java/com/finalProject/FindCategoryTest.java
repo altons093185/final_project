@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.finalProject.model.entity.Category;
 import com.finalProject.repository.CategoryRepository;
@@ -15,12 +16,16 @@ public class FindCategoryTest {
 	CategoryRepository categoryRepository;
 
 	@Test
+	@Transactional
 	public void testFindCategory() {
 		Optional<Category> categoryOpt = categoryRepository.findByNameEn("hot-buys");
 		// This method should contain the logic to test finding a category
 		// For example, you can use assertions to check if the category is found correctly
 		System.out.println(categoryOpt.isPresent() ? "Category found" : "Category not found");
+		Category cat = categoryOpt.get();
 		System.out.println(categoryOpt.get().getCategoryId());
-		System.out.println(categoryOpt.get());
+		System.out.println(categoryOpt.get().getNameEn());
+		System.out.println(categoryOpt.get().getNameZh());
+		//		System.out.println(categoryOpt.get() + "2");
 	}
 }

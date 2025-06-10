@@ -21,5 +21,6 @@ public class FindCategoryTest {
 		// For example, you can use assertions to check if the category is found correctly
 		System.out.println(categoryOpt.isPresent() ? "Category found" : "Category not found");
 		System.out.println(categoryOpt.get().getCategoryId());
+		System.out.println(categoryOpt.get());
 	}
 }

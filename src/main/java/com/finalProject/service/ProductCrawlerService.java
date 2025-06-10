@@ -46,7 +46,7 @@ public class ProductCrawlerService {
 
 	@PostConstruct
 	public void testRun() {
-		crawlCostcoHotBuys();
+		//		crawlCostcoHotBuys();
 		//		shouldFindExistingProductById();
 	}
 

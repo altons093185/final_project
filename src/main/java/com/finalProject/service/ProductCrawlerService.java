@@ -54,6 +54,7 @@ public class ProductCrawlerService {
 	@Transactional
 	public void crawlCostcoHotBuys() {
 
+
 		int count = 0;
 		System.out.println("🚀 開始 Costco 熱門優惠爬蟲");
 

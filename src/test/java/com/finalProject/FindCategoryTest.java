@@ -22,10 +22,8 @@ public class FindCategoryTest {
 		// This method should contain the logic to test finding a category
 		// For example, you can use assertions to check if the category is found correctly
 		System.out.println(categoryOpt.isPresent() ? "Category found" : "Category not found");
-		Category cat = categoryOpt.get();
 		System.out.println(categoryOpt.get().getCategoryId());
 		System.out.println(categoryOpt.get().getNameEn());
 		System.out.println(categoryOpt.get().getNameZh());
-		//		System.out.println(categoryOpt.get() + "2");
 	}
 }

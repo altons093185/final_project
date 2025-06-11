@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -23,10 +22,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.finalProject.model.dto.ProductDto;
 import com.finalProject.model.entity.Category;
+import com.finalProject.model.entity.PriceSnapshot;
 import com.finalProject.model.entity.Product;
 import com.finalProject.repository.CategoryRepository;
+import com.finalProject.repository.PriceSnapshotRepository;
 import com.finalProject.repository.ProductRepository;
 
 import jakarta.annotation.PostConstruct;
@@ -35,31 +35,18 @@ import jakarta.transaction.Transactional;
 @Service
 public class ProductCrawlerService {
 
-	private final ProductRepository productRepository;
+	@Autowired
+	private ProductRepository productRepository;
 
 	@Autowired
-	CategoryRepository categoryRepository;
+	private CategoryRepository categoryRepository;
 
-	public ProductCrawlerService(ProductRepository productRepository) {
-		this.productRepository = productRepository;
-	}
+	@Autowired
+	private PriceSnapshotRepository priceSnapshotRepository;
 
 	@PostConstruct
 	public void testRun() {
-		//		crawlCostcoHotBuys();
-		//		shouldFindExistingProductById();
-	}
-
-	public void shouldFindExistingProductById() {
-
-		List<String> productIds = new ArrayList<>();
-		productIds.add("1010656");
-		//		Map<String, Element> productIdToElement = new HashMap<>();
-
-		List<ProductDto> existingProducts = productRepository.findByProductIdIn(productIds);
-
-		System.out.println(existingProducts);
-		System.out.println("hi");
+		crawlCostcoHotBuys();
 	}
 
 	// 每天早上8點抓一次
@@ -76,7 +63,7 @@ public class ProductCrawlerService {
 		options.addArguments("--headless", "--no-sandbox", "--disable-dev-shm-usage");
 
 		WebDriver driver = new ChromeDriver(options);
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
 
 		int page = 0;
 		String url;
@@ -97,12 +84,11 @@ public class ProductCrawlerService {
 					wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("product-list-item")));
 					// wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("discount-row-message")));
 				} catch (TimeoutException e) {
-					//					System.out.println(e.getMessage());
 					System.out.println("❌ 無商品內容，結束爬蟲！");
 					break;
 				}
 
-				Thread.sleep(6000); // 保險等待
+				Thread.sleep(10000); // 保險等待
 
 				String html = driver.getPageSource();
 				Document doc = Jsoup.parse(html);
@@ -115,7 +101,6 @@ public class ProductCrawlerService {
 
 				List<Product> productsToSave = new ArrayList<>();
 				Optional<Category> categoryOpt = categoryRepository.findByNameEn("hot-buys");
-				Integer categoryId = categoryOpt.get().getCategoryId();
 				Category category = categoryOpt.get();
 
 				for (Element item : items) {
@@ -137,44 +122,45 @@ public class ProductCrawlerService {
 					// 產品 ID 從 href 取出（ex: /p/107056）
 					String href = item.select("a.js-lister-name").attr("href");
 					String productId = extractProductId(href); // 107056
-
+					LocalDateTime now = LocalDateTime.now();
 					Product product = new Product();
 					product.setProductId(productId);
 					product.setNameZh(nameZh);
 					product.setNameEn(nameEn);
 					product.setImgUrl(imageUrl);
-					// product.setOriginalPrice(originalPrice);
 					product.setDiscountAmount(discountPrice);
 					product.setCurrentPrice(currentPrice);
-					;
 					product.setUnitPrice(unitPrice);
-
-					LocalDateTime now = LocalDateTime.now();
 					product.setCreatedAt(now);
 					product.setIsActive(true);
 					product.setIsInStock(stockStatus);
 					product.setLastSeenAt(now);
 					product.setSourceUrl("https://www.costco.com.tw/p/" + productId);
-					product.setCategories(Set.of(category));
-
 					System.out.println("===========");
 					System.out.println("商品 ID: " + productId);
+					System.out.println("已加入商品：" + product.getNameZh());
 					// System.out.println("商品名稱(中): " + nameZh);
 					// System.out.println("商品名稱(英): " + nameEn);
 					// System.out.println("商品圖片: " + imageUrl);
 					// System.out.println("單價: " + unitPrice);
 					// System.out.println("原價: " + originalPrice);
-					System.out.println("折扣: " + discountPrice);
-					// System.out.println("小計: " + currentPrice);
-					System.out.println("庫存狀態: " + stockStatus);
+//					System.out.println("折扣: " + discountPrice);
+//					 System.out.println("小計: " + currentPrice);
+//					System.out.println("庫存狀態: " + stockStatus);
+//					productsToSave.add(product);
+					productRepository.save(product); // 儲存商品到資料庫
+
+
+					upsertSnapshotPrice(product); // 儲存價格快照
+
+
+//					product.setCategories(new HashSet<>(List.of(category)));
+
+
 					count++;
-
-					productsToSave.add(product);
-
-					System.out.println("已加入商品：" + product.getNameZh());
 				}
 				page++;
-				productRepository.saveAll(productsToSave);
+//				productRepository.saveAll(productsToSave);
 				System.out.println("目前商品數量: " + count);
 
 			}
@@ -185,10 +171,6 @@ public class ProductCrawlerService {
 			driver.quit();
 			System.out.println("🚀 爬蟲結束，共抓取 " + count + " 件商品");
 		}
-	}
-
-	public void crawlCostcoWhatsNew() {
-
 	}
 
 	// 把 "$539"、"商品已折價 $110" → 轉成整數
@@ -205,5 +187,14 @@ public class ProductCrawlerService {
 		if (href == null || !href.contains("/p/"))
 			return "";
 		return href.substring(href.lastIndexOf("/p/") + 3);
+	}
+
+	public void upsertSnapshotPrice(Product product) {
+	    PriceSnapshot priceSnapshot = new PriceSnapshot();
+	    priceSnapshot.setProduct(product);
+	    priceSnapshot.setPrice(product.getCurrentPrice());
+	    priceSnapshot.setCapturedAt(product.getLastSeenAt());
+	    priceSnapshot.setIsDiscount(product.getDiscountAmount() > 0);
+	    priceSnapshotRepository.save(priceSnapshot); // 儲存價格快照
 	}
 }

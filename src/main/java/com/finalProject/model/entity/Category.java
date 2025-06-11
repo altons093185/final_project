@@ -47,7 +47,7 @@ public class Category {
 	private Category parent;
 
 	// 自我關聯 - 下層分類（可選）
-	@OneToMany(mappedBy = "parentId", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
 	private List<Category> subCategories = new ArrayList<>();
 
 	@ManyToMany(mappedBy = "categories")

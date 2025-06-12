@@ -9,10 +9,13 @@ import org.springframework.stereotype.Service;
 
 import com.finalProject.exception.UserRegisterException;
 import com.finalProject.mapper.UserMapper;
+import com.finalProject.model.dto.UserCertDto;
 import com.finalProject.model.dto.UserDto;
 import com.finalProject.model.entity.User;
 import com.finalProject.repository.UserRepository;
 import com.finalProject.util.Hash;
+
+import jakarta.servlet.http.HttpSession;
 
 @Service
 public class UserService {
@@ -41,5 +44,9 @@ public class UserService {
 		user.setHashSalt(salt);
 		user.setCreatedAt(LocalDateTime.now());
 		return userRepository.save(user);
+	}
+
+	public UserCertDto getCurrentUser(HttpSession session) {
+	    return (UserCertDto) session.getAttribute("userCert");
 	}
 }

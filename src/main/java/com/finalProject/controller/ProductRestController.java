@@ -22,7 +22,7 @@ public class ProductRestController {
 	private ProductService productService;
 
 	@GetMapping
-	public ResponseEntity<ApiResponse<List<ProductDto>>> findAllRooms() {
+	public ResponseEntity<ApiResponse<List<ProductDto>>> findAllProducts() {
 		List<ProductDto> productDtos = productService.findAllProducts(); // payload
 		String message = productDtos.isEmpty() ? "查無資料" : "查詢成功";
 		return ResponseEntity.ok(ApiResponse.success(message, productDtos));

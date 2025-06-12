@@ -1,9 +1,7 @@
 package com.finalProject.model.entity;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -50,7 +48,11 @@ public class Category {
 	@OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
 	private List<Category> subCategories = new ArrayList<>();
 
-	@ManyToMany(mappedBy = "categories")
-	private Set<Product> products = new HashSet<>();
+//	@ManyToMany(mappedBy = "categories", fetch = FetchType.EAGER)
+//	private Set<Product> products = new HashSet<>();
+
+//	test
+	@ManyToMany(mappedBy = "categories", fetch = FetchType.EAGER)
+	private List<Product> products = new ArrayList<>();
 
 }

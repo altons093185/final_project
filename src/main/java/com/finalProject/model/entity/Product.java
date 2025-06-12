@@ -3,9 +3,7 @@ package com.finalProject.model.entity;
 import java.time.LocalDateTime;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -71,7 +69,20 @@ public class Product {
 	@OneToMany(mappedBy = "product")
 	private List<PriceSnapshot> priceSnapshots = new ArrayList<>();
 
+//	@ManyToMany
+//	@JoinTable(name = "product_category", joinColumns = @JoinColumn(name = "product_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
+//	private Set<Category> categories = new HashSet<>();
+
+//	test
 	@ManyToMany
 	@JoinTable(name = "product_category", joinColumns = @JoinColumn(name = "product_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
-	private Set<Category> categories = new HashSet<>();
+	private List<Category> categories = new ArrayList<>();
+
+//	public void addcat(Category category) {
+//	    if (categories == null) {
+//		categories = new HashSet<>();
+//	    }
+//	    categories.add(category);
+//	}
+
 }

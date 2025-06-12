@@ -78,4 +78,14 @@ public class AuthController {
 		return ResponseEntity.ok(ApiResponse.success("檢查登入 : " + (loggedIn ? "已登入" : "尚未登入"), loggedIn));
 	}
 
+	@GetMapping("/get-user")
+	public ResponseEntity<ApiResponse<UserCertDto>> getUser(HttpSession session) {
+	    UserCertDto userCert = userService.getCurrentUser(session);
+	    if (userCert == null) {
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+			.body(ApiResponse.error(HttpStatus.UNAUTHORIZED, "尚未登入"));
+	    }
+	    return ResponseEntity.ok(ApiResponse.success("取得使用者資訊", userCert));
+	}
+
 }

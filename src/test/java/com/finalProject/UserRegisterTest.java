@@ -13,7 +13,7 @@ public class UserRegisterTest {
 
 	@Test
 	public void testUserAdd() {
-		userService.register("test@gmail.com", "1234");
+		userService.register("test", "test@gmail.com", "1234");
 		System.out.println("User add ok!");
 	}
 

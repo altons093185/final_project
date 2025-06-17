@@ -32,9 +32,10 @@ public class AuthController {
 	private UserCertService userCertService;
 
 	@PostMapping("/register")
-	public ResponseEntity<ApiResponse<Void>> register(@RequestParam String email, @RequestParam String password) {
+	public ResponseEntity<ApiResponse<Void>> register(@RequestParam String userName, @RequestParam String email,
+			@RequestParam String password) {
 		try {
-			User user = userService.register(email, password);
+			User user = userService.register(userName, email, password);
 			return ResponseEntity.ok(ApiResponse.success("註冊成功: " + user.getEmail(), null));
 
 		} catch (UserRegisterException e) {
@@ -42,6 +43,22 @@ public class AuthController {
 					.body(ApiResponse.error(HttpStatus.BAD_REQUEST, "註冊失敗: " + e.getMessage()));
 		}
 	}
+
+	// 使用 @RequestBody 來接收 JSON 格式的請求體
+//	@PostMapping("/register")
+//	public ResponseEntity<ApiResponse<Void>> register(@RequestBody User request) {
+//		try {
+//			String userName = request.getUserName();
+//			String email = request.getEmail();
+//			String password = request.getHashPassword();
+//			User user = userService.register(userName, email, password);
+//			return ResponseEntity.ok(ApiResponse.success("註冊成功: " + user.getEmail(), null));
+//
+//		} catch (UserRegisterException e) {
+//			return ResponseEntity.badRequest()
+//					.body(ApiResponse.error(HttpStatus.BAD_REQUEST, "註冊失敗: " + e.getMessage()));
+//		}
+//	}
 
 	@PostMapping("/login")
 	public ResponseEntity<ApiResponse<Void>> login(@RequestParam String email, @RequestParam String password,
@@ -80,12 +97,12 @@ public class AuthController {
 
 	@GetMapping("/get-user")
 	public ResponseEntity<ApiResponse<UserCertDto>> getUser(HttpSession session) {
-	    UserCertDto userCert = userService.getCurrentUser(session);
-	    if (userCert == null) {
-		return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-			.body(ApiResponse.error(HttpStatus.UNAUTHORIZED, "尚未登入"));
-	    }
-	    return ResponseEntity.ok(ApiResponse.success("取得使用者資訊", userCert));
+		UserCertDto userCert = userService.getCurrentUser(session);
+		if (userCert == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+					.body(ApiResponse.error(HttpStatus.UNAUTHORIZED, "尚未登入"));
+		}
+		return ResponseEntity.ok(ApiResponse.success("取得使用者資訊", userCert));
 	}
 
 }

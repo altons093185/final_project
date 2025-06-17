@@ -18,10 +18,11 @@ public class ProductService {
 	private ProductMapper productMapper;
 
 	public List<ProductDto> findAllProducts() {
-		return productRepository.findAll()
-								.stream()
-								.map(productMapper::toDto)
-								.toList();
+		return productRepository.findAll().stream().map(productMapper::toDto).toList();
+	}
+
+	public List<ProductDto> getProductsByCategoryName(String categoryName) {
+		return productRepository.findByCategories_nameEn(categoryName).stream().map(productMapper::toDto).toList();
 	}
 
 }

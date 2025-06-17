@@ -52,7 +52,7 @@ public class Category {
 //	private Set<Product> products = new HashSet<>();
 
 //	test
-	@ManyToMany(mappedBy = "categories", fetch = FetchType.EAGER)
+	@ManyToMany(mappedBy = "categories", fetch = FetchType.LAZY)
 	private List<Product> products = new ArrayList<>();
 
 }

@@ -1,7 +1,6 @@
 package com.finalProject.model.entity;
 
 import java.time.LocalDateTime;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +32,9 @@ public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
+
+	@Column(name = "user_name", nullable = false, length = 50)
+	private String userName;
 
 	@Column(nullable = false, unique = true)
 	private String email;

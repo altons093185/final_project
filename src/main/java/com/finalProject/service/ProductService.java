@@ -25,4 +25,17 @@ public class ProductService {
 		return productRepository.findByCategories_nameEn(categoryName).stream().map(productMapper::toDto).toList();
 	}
 
+	public List<ProductDto> getProductsByIsPopularItem() {
+		return productRepository.findByIsPopularItem(true).stream().map(productMapper::toDto).toList();
+	}
+
+	public ProductDto getProductDetail(String productId) {
+		return productRepository.findByProductId(productId).map(productMapper::toDto)
+				.orElseThrow(() -> new RuntimeException("查無商品"));
+	}
+
+//	public List<PriceHistoryDto> getPriceHistory(String productId) {
+//		return priceHistoryRepository.findByProductIdOrderByDateAsc(productId).stream()
+//				.map(p -> new PriceHistoryDto(p.getDate(), p.getPrice())).toList();
+//	}
 }

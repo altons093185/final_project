@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.finalProject.model.dto.AddToCartDto;
@@ -58,13 +59,14 @@ public class CartController {
 	}
 
 	@DeleteMapping("/remove")
-	public ResponseEntity<ApiResponse<Void>> removeFromCart(@RequestBody CartItemDto cartItemDto, HttpSession session) {
+	public ResponseEntity<ApiResponse<Void>> removeFromCart(@RequestParam String productId, HttpSession session) {
 		UserCertDto userCertDto = userService.getCurrentUser(session);
 		if (userCertDto == null) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 					.body(ApiResponse.error(HttpStatus.UNAUTHORIZED, "尚未登入"));
 		}
-		cartService.removeFromCart(userCertDto.getId(), cartItemDto.getProductId());
+		Integer userId = userCertDto.getId();
+		cartService.removeFromCart(userId, productId);
 		return ResponseEntity.ok(ApiResponse.success("商品已從購物車移除", null));
 	}
 
@@ -77,6 +79,18 @@ public class CartController {
 		}
 		cartService.updateCartItem(userCertDto.getId(), cartItemDto.getProductId(), cartItemDto.getQuantity());
 		return ResponseEntity.ok(ApiResponse.success("購物車商品數量已更新", null));
+	}
+
+	@PostMapping("/checkout")
+	public ResponseEntity<ApiResponse<Void>> checkout(HttpSession session) {
+		UserCertDto userCertDto = userService.getCurrentUser(session);
+		if (userCertDto == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+					.body(ApiResponse.error(HttpStatus.UNAUTHORIZED, "尚未登入"));
+		}
+		Integer userId = userCertDto.getId();
+		cartService.checkout(userId);
+		return ResponseEntity.ok(ApiResponse.success("結帳成功", null));
 	}
 
 }

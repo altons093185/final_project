@@ -6,8 +6,8 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.finalProject.mapper.CartItemMapper;
 import com.finalProject.mapper.UserMapper;
 import com.finalProject.model.dto.CartItemDto;
 import com.finalProject.model.entity.Cart;
@@ -37,8 +37,8 @@ public class CartService {
 	@Autowired
 	private UserMapper userMapper;
 
-	@Autowired
-	private CartItemMapper cartItemMapper;
+//	@Autowired
+//	private CartItemMapper cartItemMapper;
 
 	LocalDateTime now = LocalDateTime.now();
 
@@ -91,6 +91,37 @@ public class CartService {
 //		List<CartItemDto> itemList = items.stream().map(item.getProduct()::toDto).toList();
 
 		return itemList;
+	}
+
+	public void removeFromCart(Integer userId, String productId) {
+		Cart cart = cartRepository.findByUserId(userId).orElseThrow(() -> new RuntimeException("尚未建立購物車"));
+		Product product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("找不到該商品"));
+		CartItem item = cartItemRepository.findByCartAndProduct(cart, product)
+				.orElseThrow(() -> new RuntimeException("購物車中無此商品"));
+
+		cartItemRepository.delete(item);
+
+	}
+
+	public void updateCartItem(Integer userId, String productId, int quantity) {
+		Cart cart = cartRepository.findByUserId(userId).orElseThrow(() -> new RuntimeException("尚未建立購物車"));
+		Product product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("找不到該商品"));
+		CartItem item = cartItemRepository.findByCartAndProduct(cart, product)
+				.orElseThrow(() -> new RuntimeException("購物車中無此商品"));
+		if (quantity <= 0) {
+			cartItemRepository.delete(item);
+		} else {
+			item.setQuantity(quantity);
+			cartItemRepository.save(item);
+		}
+
+	}
+
+	@Transactional
+	public void checkout(Integer userId) {
+		Cart cart = cartRepository.findByUserId(userId).orElseThrow(() -> new RuntimeException("尚未建立購物車"));
+		cartItemRepository.deleteByCart(cart); // 清空購物車內商品
+
 	}
 
 }

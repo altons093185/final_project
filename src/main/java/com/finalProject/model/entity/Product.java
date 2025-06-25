@@ -1,7 +1,6 @@
 package com.finalProject.model.entity;
 
 import java.time.LocalDateTime;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,6 +58,9 @@ public class Product {
 
 	@Column(name = "created_at")
 	private LocalDateTime createdAt;
+
+	@Column(name = "is_popular_item")
+	private Boolean isPopularItem;
 
 	@OneToMany(mappedBy = "product")
 	private List<CartItem> cartItems = new ArrayList<>();

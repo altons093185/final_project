@@ -23,9 +23,9 @@ public class LoginFilter extends HttpFilter {
 			throws IOException, ServletException {
 		String method = request.getMethod();
 		HttpSession session = request.getSession();
-		//		System.out.println(method);
-		//		System.out.println("過濾器中 session ID = " + session.getId());
-		//		System.out.println(session.getAttribute("userCert"));
+		// System.out.println(method);
+		// System.out.println("過濾器中 session ID = " + session.getId());
+		// System.out.println(session.getAttribute("userCert"));
 		// 開放 GET 查詢
 		if ("GET".equalsIgnoreCase(method) || "OPTIONS".equalsIgnoreCase(method)) {
 			chain.doFilter(request, response);
@@ -34,7 +34,7 @@ public class LoginFilter extends HttpFilter {
 
 		// 非 GET 時驗證登入狀態
 		if (session != null && session.getAttribute("userCert") != null) {
-			//			System.out.println("HI");
+			// System.out.println("HI");
 			chain.doFilter(request, response); // 已登入，放行
 		} else {
 			// 未登入，回傳 401

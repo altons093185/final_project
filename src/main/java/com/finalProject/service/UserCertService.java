@@ -30,7 +30,8 @@ public class UserCertService {
 			throw new PasswordInvalidException("密碼錯誤");
 		}
 		// 3. 簽發憑證
-		UserCertDto userCertDto = new UserCertDto(user.getId(), user.getEmail(), user.getRole());
+		UserCertDto userCertDto = new UserCertDto(user.getId(), user.getEmail(), user.getUserName(), user.getRole(),
+				user.getCreatedAt(), user.getIsVerified());
 		return userCertDto;
 	}
 

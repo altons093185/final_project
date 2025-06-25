@@ -1,7 +1,6 @@
 package com.finalProject.model.entity;
 
 import java.time.LocalDateTime;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,6 +40,21 @@ public class Order {
 
 	@Column(name = "created_at", nullable = false)
 	private LocalDateTime createdAt;
+
+	@Column(name = "name")
+	private String name;
+
+	@Column(name = "phone")
+	private String phone;
+
+	@Column(name = "city")
+	private String city;
+
+	@Column(name = "zip_code")
+	private String zipCode;
+
+	@Column(name = "address")
+	private String address;
 
 	@ManyToOne
 	@JoinColumn(name = "user_id", nullable = false)

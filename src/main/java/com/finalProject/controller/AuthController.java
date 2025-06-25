@@ -61,14 +61,14 @@ public class AuthController {
 //	}
 
 	@PostMapping("/login")
-	public ResponseEntity<ApiResponse<Void>> login(@RequestParam String email, @RequestParam String password,
+	public ResponseEntity<ApiResponse<UserCertDto>> login(@RequestParam String email, @RequestParam String password,
 			HttpSession session) {
 		try {
 			UserCertDto cert = userCertService.issuedCert(email, password);
 			session.setAttribute("userCert", cert);
 			System.out.println("登入成功 session ID = " + session.getId());
 
-			return ResponseEntity.ok(ApiResponse.success("登入成功", null));
+			return ResponseEntity.ok(ApiResponse.success("登入成功", cert));
 		} catch (CertException e) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 					.body(ApiResponse.error(HttpStatus.UNAUTHORIZED, "登入失敗: " + e.getMessage()));
@@ -89,20 +89,20 @@ public class AuthController {
 		return ResponseEntity.ok(ApiResponse.success("登出成功", null));
 	}
 
-	@GetMapping("/check-login")
+	@GetMapping("/checkLogin")
 	public ResponseEntity<ApiResponse<Boolean>> checkLogin(HttpSession session) {
 		boolean loggedIn = session.getAttribute("userCert") != null;
 		return ResponseEntity.ok(ApiResponse.success("檢查登入 : " + (loggedIn ? "已登入" : "尚未登入"), loggedIn));
 	}
 
-	@GetMapping("/get-user")
+	@GetMapping("/getUser")
 	public ResponseEntity<ApiResponse<UserCertDto>> getUser(HttpSession session) {
-		UserCertDto userCert = userService.getCurrentUser(session);
-		if (userCert == null) {
+		UserCertDto userCertDto = userService.getCurrentUser(session);
+		if (userCertDto == null) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 					.body(ApiResponse.error(HttpStatus.UNAUTHORIZED, "尚未登入"));
 		}
-		return ResponseEntity.ok(ApiResponse.success("取得使用者資訊", userCert));
+		return ResponseEntity.ok(ApiResponse.success("取得使用者資訊", userCertDto));
 	}
 
 }

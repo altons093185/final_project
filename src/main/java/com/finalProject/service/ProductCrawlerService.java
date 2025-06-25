@@ -61,19 +61,22 @@ public class ProductCrawlerService {
 		WebDriver driver = new ChromeDriver(options);
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
-		Optional<Category> categoryOpt = categoryRepository.findByNameEn("whats-new");
+		Optional<Category> categoryOpt = categoryRepository.findByNameEn("Household-Baby-Toys");
 		Category category = categoryOpt.get();
 
 		int page = 0;
 		String url;
 		try {
-			while (page < 3) { // 最多爬取 100 頁
+			while (page < 4) { // 最多爬取 100 頁
 				if (page == 0) {
 //					url = "https://www.costco.com.tw/c/hot-buys";
-					url = "https://www.costco.com.tw/c/whats-new";
+//					url = "https://www.costco.com.tw/c/whats-new";
+					url = category.getUrl();
+
 				} else {
 //					url = "https://www.costco.com.tw/c/hot-buys?page=" + page;
-					url = "https://www.costco.com.tw/c/whats-new?page=" + page;
+//					url = "https://www.costco.com.tw/c/whats-new?page=" + page;
+					url = category.getUrl() + "?page=" + page;
 				}
 				System.out.println("🌀 爬取第 " + (page + 1) + " 頁：" + url);
 

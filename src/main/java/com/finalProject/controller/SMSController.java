@@ -26,30 +26,20 @@ public class SMSController {
 	@PostMapping("/receive-sms")
 	public ResponseEntity<String> receiveSMS(HttpServletRequest request) throws IOException {
 		System.out.println("=== 📩 收到簡訊請求 ===");
-
-		// 🔍 印出所有 headers
-//		System.out.println("[Headers]");
-//		Enumeration<String> headerNames = request.getHeaderNames();
-//		for (String headerName : Collections.list(headerNames)) {
-//			System.out.println(headerName + ": " + request.getHeader(headerName));
-//		}
-
-		// 🔍 印出 Content-Type
-//		String contentType = request.getContentType();
-//		System.out.println("\n[Content-Type] " + contentType);
-
 		// 📩 讀取 Body 原始內容
 		String body = new BufferedReader(request.getReader()).lines().collect(Collectors.joining("\n"));
 
+//		body = "富邦卡末四碼1549網路交易新臺幣TWD$4999，認證碼BHQO-『3874』5分鐘有效。勿將密碼告知他人以防詐騙。"; //test
 		System.out.println("\n[Body]\n" + body);
 
 		// ✅ 嘗試解析驗證碼
 		Pattern pattern = Pattern.compile("認證碼\\s*([A-Z]{4}).*?『(\\d{4})』");
 		Matcher matcher = pattern.matcher(body);
 		if (matcher.find()) {
-			String verificationCode = matcher.group(1);
-			String identifierLetter = matcher.group(2);
-			System.out.println("🔑 抓到驗證碼：" + verificationCode);
+			String identifierLetter = matcher.group(1);
+			String verificationCode = matcher.group(2);
+			System.out.println("🔑 抓到驗證碼 英文：" + identifierLetter);
+			System.out.println("🔑 抓到驗證碼 數字：" + verificationCode);
 			SmsCodeHolder.set(identifierLetter, verificationCode);
 		}
 

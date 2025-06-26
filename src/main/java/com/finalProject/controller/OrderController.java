@@ -66,13 +66,13 @@ public class OrderController {
 	@GetMapping("/{orderId}") // 單張訂單細節
 	public ResponseEntity<ApiResponse<OrderDetailDto>> getOrderDetail(@PathVariable Integer orderId,
 			HttpSession session) {
-		UserCertDto userCert = userService.getCurrentUser(session);
-		if (userCert == null) {
+		UserCertDto userCertDto = userService.getCurrentUser(session);
+		if (userCertDto == null) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 					.body(ApiResponse.error(HttpStatus.UNAUTHORIZED, "尚未登入"));
 		}
 
-		OrderDetailDto detail = orderService.getOrderDetail(orderId, userCert.getId(), userCert.getRole());
+		OrderDetailDto detail = orderService.getOrderDetail(orderId, userCertDto.getId(), userCertDto.getRole());
 		return ResponseEntity.ok(ApiResponse.success("取得訂單明細", detail));
 	}
 
@@ -88,6 +88,7 @@ public class OrderController {
 		return ResponseEntity.ok(ApiResponse.success("訂單已建立並結帳成功", null));
 	}
 
+	// 出貨
 	@PostMapping("/admin/{orderId}")
 	public ResponseEntity<ApiResponse<OrderDetailDto>> autoCreateOrder(@PathVariable Integer orderId,
 			HttpSession session) {
@@ -101,8 +102,13 @@ public class OrderController {
 					.body(ApiResponse.error(HttpStatus.UNAUTHORIZED, "非管理員身分!"));
 		}
 
-		OrderDetailDto detail = orderService.getOrderDetail(orderId, userCertDto.getId(), userCertDto.getRole());
-		return ResponseEntity.ok(ApiResponse.success("取得訂單明細", detail));
+		try {
+			orderService.autoCreateOrder(orderId, userCertDto.getId(), userCertDto.getRole());
+			return ResponseEntity.ok(ApiResponse.success("已成功出貨", null));
+		} catch (RuntimeException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.body(ApiResponse.error(HttpStatus.BAD_REQUEST, "出貨失敗: " + e.getMessage()));
+		}
 	}
 
 }

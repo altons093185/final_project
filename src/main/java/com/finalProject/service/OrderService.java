@@ -57,6 +57,9 @@ public class OrderService {
 	@Autowired
 	private OrderDetailMapper orderDetailMapper;
 
+	@Autowired
+	private AutoCreateOrderService autoCreateOrderService;
+
 	@Transactional
 	public void createOrderWithInfo(Integer userId, OrderUserInfoDto userInfoReq) {
 		User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("找不到該使用者"));
@@ -140,5 +143,30 @@ public class OrderService {
 		return orderDetail;
 	}
 
-//	public void autoCreateOrder()
+	public void autoCreateOrder(Integer orderId, Integer userId, Role userRole) {
+		OrderDetailDto orderDetailDto = getOrderDetail(orderId, userId, userRole);
+		orderDetailDto.getName();
+		orderDetailDto.getPhone();
+		orderDetailDto.getCity();
+		orderDetailDto.getZipCode();
+		orderDetailDto.getAddress();
+		orderDetailDto.getItems().forEach(item -> {
+			Product product = productRepository.findById(item.getProductId())
+					.orElseThrow(() -> new RuntimeException("找不到該商品"));
+			if (!product.getIsInStock()) {
+				throw new RuntimeException("商品 " + product.getNameZh() + " 已經下架，無法出貨");
+			}
+		});
+
+		autoCreateOrderService.startAutoProcess();
+
+		if (orderDetailDto.getIsShipped()) {
+			throw new RuntimeException("訂單已經出貨，無法再次出貨");
+		}
+
+//		if (!orderDetailDto.getIsPaid()) {
+//			throw new RuntimeException("訂單未付款，請先付款");
+//		}
+
+	}
 }

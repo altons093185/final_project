@@ -36,7 +36,7 @@ public class AutoCreateOrderService {
 	Integer zipCode;
 
 //	@PostConstruct
-	public void runOnStartup() {
+	public void startAutoProcess() {
 		try {
 			setupDriver();
 			login();

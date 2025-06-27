@@ -143,30 +143,37 @@ public class OrderService {
 		return orderDetail;
 	}
 
+	@Transactional
 	public void autoCreateOrder(Integer orderId, Integer userId, Role userRole) {
 		OrderDetailDto orderDetailDto = getOrderDetail(orderId, userId, userRole);
-		orderDetailDto.getName();
-		orderDetailDto.getPhone();
-		orderDetailDto.getCity();
-		orderDetailDto.getZipCode();
-		orderDetailDto.getAddress();
-		orderDetailDto.getItems().forEach(item -> {
-			Product product = productRepository.findById(item.getProductId())
-					.orElseThrow(() -> new RuntimeException("找不到該商品"));
-			if (!product.getIsInStock()) {
-				throw new RuntimeException("商品 " + product.getNameZh() + " 已經下架，無法出貨");
-			}
-		});
+		String recipientName = orderDetailDto.getName();
+		String recipientPhone = orderDetailDto.getPhone();
+		String recipientCity = orderDetailDto.getCity();
+		String recipientZipCode = orderDetailDto.getZipCode();
+		String recipientAddress = orderDetailDto.getAddress();
+		List<String> productIds = orderDetailDto.getItems().stream().map(item -> item.getProductId()).toList();
 
-		autoCreateOrderService.startAutoProcess();
+//		System.out.println(recipientName);
+//		System.out.println(recipientPhone);
+//		System.out.println(recipientCity);
+//		System.out.println(recipientZipCode);
+//		System.out.println(recipientAddress);
+//		System.out.println(productIds);
 
 		if (orderDetailDto.getIsShipped()) {
 			throw new RuntimeException("訂單已經出貨，無法再次出貨");
 		}
-
 //		if (!orderDetailDto.getIsPaid()) {
 //			throw new RuntimeException("訂單未付款，請先付款");
 //		}
+
+		autoCreateOrderService.startAutoProcess(recipientName, recipientPhone, recipientCity, recipientZipCode,
+				recipientAddress, productIds);
+
+		Order order = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("找不到訂單"));
+
+		order.setIsShipped(true);
+		orderRepository.save(order);
 
 	}
 }

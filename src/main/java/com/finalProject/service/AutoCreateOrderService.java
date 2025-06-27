@@ -1,6 +1,7 @@
 package com.finalProject.service;
 
 import java.time.Duration;
+import java.util.List;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.ElementClickInterceptedException;
@@ -30,17 +31,20 @@ public class AutoCreateOrderService {
 	private final String PASSWORD = "aP123817346";
 
 	private final String LOGIN_URL = "https://www.costco.com.tw/login";
-	private final String PRODUCT_URL = "https://www.costco.com.tw/p/153145";
+//	private final String PRODUCT_URL = "https://www.costco.com.tw/p/153145";
 
-	Integer cityId = CityMapper.getCityIdByName(""); // cityNameFromFrontend
 	Integer zipCode;
 
 //	@PostConstruct
-	public void startAutoProcess() {
+	public void startAutoProcess(String recipientName, String recipientPhone, String recipientCity,
+			String recipientZipCode, String recipientAddress, List<String> productIds) {
 		try {
 			setupDriver();
 			login();
-			visitProductPageAndAddToCart();
+			for (String productId : productIds) {
+				visitProductPageAndAddToCart(productId);
+				System.out.println("商品ID: " + productId);
+			}
 
 			clickViewCart();
 			Thread.sleep(1000);
@@ -54,15 +58,15 @@ public class AutoCreateOrderService {
 			clickAddNewAddress();
 			Thread.sleep(1000);
 
-			fillInNewAddressForm();
+			fillInNewAddressForm(recipientName, recipientPhone, recipientCity, recipientZipCode, recipientAddress);
 			Thread.sleep(1000);
 
 			fillInCVV();
 			Thread.sleep(1000);
 
-//			clickSubmitPayment();
+			clickSubmitPayment();
 			Thread.sleep(1000);
-//			waitForOtpAndFillIn();
+			waitForOtpAndFillIn();
 			Thread.sleep(1000);
 
 		} catch (Exception e) {
@@ -80,7 +84,7 @@ public class AutoCreateOrderService {
 		options.addArguments("profile-directory=Profile 1"); // 這是預設的個人資料名稱
 
 		driver = new ChromeDriver(options);
-		wait = new WebDriverWait(driver, Duration.ofSeconds(4));
+		wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 		js = (JavascriptExecutor) driver;
 	}
 
@@ -110,8 +114,9 @@ public class AutoCreateOrderService {
 		}
 	}
 
-	public void visitProductPageAndAddToCart() {
+	public void visitProductPageAndAddToCart(String productIds) {
 		try {
+			String PRODUCT_URL = "https://www.costco.com.tw/p/" + productIds;
 			driver.get(PRODUCT_URL);
 			wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")));
 			Thread.sleep(1000);
@@ -198,36 +203,47 @@ public class AutoCreateOrderService {
 		}
 	}
 
-	public void fillInNewAddressForm() {
+	public void fillInNewAddressForm(String recipientName, String recipientPhone, String recipientCity,
+			String recipientZipCode, String recipientAddress) {
 		try {
 			System.out.println("📝 開始填寫地址...");
 
 			// 姓名
 			WebElement nameInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("firstName1")));
 			nameInput.clear();
-			nameInput.sendKeys("吳冠諭");
+			Thread.sleep(400);
+			System.out.println(recipientName);
+			nameInput.sendKeys(recipientName);
 
 			// 電話
 			WebElement phoneInput = driver.findElement(By.id("phone1"));
 			phoneInput.clear();
-			phoneInput.sendKeys("0980938534");
+			Thread.sleep(400);
+			phoneInput.sendKeys(recipientPhone);
 
 			// 選擇縣市（新北市 value="2"）
+			String parseToCityId = CityMapper.getCityIdByName(recipientCity); // 新北市=>2
+			System.out.println(parseToCityId);
 			WebElement citySelect = driver.findElement(By.id("city"));
 			Select cityDropdown = new Select(citySelect);
-			cityDropdown.selectByValue("2");
+			Thread.sleep(400);
+			cityDropdown.selectByValue(parseToCityId);
 
 			Thread.sleep(1000); // ⏳ 小延遲讓郵遞區號刷新
 
 			// 選擇郵遞區號（242新莊區）
+			String parseToZipCode = recipientZipCode.substring(0, 3);
+			System.out.println(parseToZipCode);
 			WebElement postalSelect = driver.findElement(By.id("postalCode"));
 			Select postalDropdown = new Select(postalSelect);
-			postalDropdown.selectByValue("242");
+			Thread.sleep(400);
+			postalDropdown.selectByValue(parseToZipCode);
 
 			// 地址
 			WebElement addressInput = driver.findElement(By.id("homeAddress1"));
 			addressInput.clear();
-			addressInput.sendKeys("中平路110巷7號4樓");
+			Thread.sleep(400);
+			addressInput.sendKeys(recipientAddress);
 
 			Thread.sleep(500); // ⏳ 讓欄位完成填寫
 
@@ -272,6 +288,22 @@ public class AutoCreateOrderService {
 
 	public void waitForOtpAndFillIn() {
 		try {
+			wait.until(ExpectedConditions.presenceOfElementLocated(By.id("Cardinal-ElementContainer")));
+			System.out.println("✅ DOM 中已出現驗證容器");
+			// 等待 iframe 出現
+			wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("Cardinal-ElementContainer")));
+			Thread.sleep(1000);
+			WebElement iframe = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("Cardinal-CCA-IFrame")));
+
+			// 切換進 iframe
+			driver.switchTo().frame(iframe);
+			System.out.println("✅ 已切換至銀行驗證 iframe");
+
+			Thread.sleep(1000);
+			WebElement sendSMSBtn = wait.until(ExpectedConditions.elementToBeClickable(By.id("btnVerifySubmit")));
+			sendSMSBtn.click();
+			System.out.println("✅ 已送出驗證碼");
+
 			System.out.println("📨 等待簡訊驗證碼中...");
 			int retries = 60;
 			while (retries-- > 0) {
@@ -279,20 +311,23 @@ public class AutoCreateOrderService {
 				String verificationCode = SmsCodeHolder.getCode(); // 數字驗證碼
 
 				if (verificationCode != null && identifierLetter != null) {
-					WebElement radioBtn = driver
-							.findElement(By.cssSelector("input[name='identifier'][value='" + identifierLetter + "']"));
+					WebElement radioBtn = wait.until(ExpectedConditions.elementToBeClickable(
+							By.cssSelector("input[name='identifier'][value='" + identifierLetter + "']")));
 					radioBtn.click();
 
 					WebElement otpInput = wait
 							.until(ExpectedConditions.visibilityOfElementLocated(By.id("challengeValue")));
 					otpInput.sendKeys(verificationCode);
 					System.out.println("✅ 已填入驗證碼：" + verificationCode);
+					break;
 				}
 				Thread.sleep(1000);
-				WebElement submitButton = driver.findElement(By.id("btnVerifySubmit"));
-				submitButton.click();
-				System.out.println("✅ 已送出驗證碼");
 			}
+
+			WebElement sendVerifyCodeBtn = wait
+					.until(ExpectedConditions.elementToBeClickable(By.id("btnVerifySubmit")));
+//			sendVerifyCodeBtn.click();
+
 		} catch (Exception e) {
 			System.out.println("❌ 60 秒內未收到驗證碼");
 			e.printStackTrace();

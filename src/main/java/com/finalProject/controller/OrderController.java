@@ -89,7 +89,7 @@ public class OrderController {
 	}
 
 	// 出貨
-	@PostMapping("/admin/{orderId}")
+	@PostMapping("/admin/ship/{orderId}")
 	public ResponseEntity<ApiResponse<OrderDetailDto>> autoCreateOrder(@PathVariable Integer orderId,
 			HttpSession session) {
 		UserCertDto userCertDto = userService.getCurrentUser(session);

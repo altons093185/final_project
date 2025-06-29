@@ -38,8 +38,8 @@ public class SMSController {
 		if (matcher.find()) {
 			String identifierLetter = matcher.group(1);
 			String verificationCode = matcher.group(2);
-			System.out.println("🔑 抓到驗證碼 英文：" + identifierLetter);
-			System.out.println("🔑 抓到驗證碼 數字：" + verificationCode);
+			System.out.println("🔑 API抓到驗證碼 英文：" + identifierLetter);
+			System.out.println("🔑 API抓到驗證碼 數字：" + verificationCode);
 			SmsCodeHolder.set(identifierLetter, verificationCode);
 		}
 

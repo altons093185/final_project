@@ -29,13 +29,8 @@ public class AutoCreateOrderService {
 
 	private final String USERNAME = "altons093185@gmail.com";
 	private final String PASSWORD = "aP123817346";
-
 	private final String LOGIN_URL = "https://www.costco.com.tw/login";
-//	private final String PRODUCT_URL = "https://www.costco.com.tw/p/153145";
 
-	Integer zipCode;
-
-//	@PostConstruct
 	public void startAutoProcess(String recipientName, String recipientPhone, String recipientCity,
 			String recipientZipCode, String recipientAddress, List<String> productIds) {
 		try {
@@ -71,6 +66,7 @@ public class AutoCreateOrderService {
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			throw new RuntimeException("自動下單流程失敗", e);
 		}
 
 	}
@@ -277,6 +273,7 @@ public class AutoCreateOrderService {
 	public void clickSubmitPayment() {
 		try {
 			WebElement payBtn = wait.until(ExpectedConditions.elementToBeClickable(By.id("paymentstep-btn-submit")));
+			Thread.sleep(1000);
 			payBtn.click();
 			System.out.println("✅ 已點擊『付款』按鈕，訂單送出中...");
 		} catch (Exception e) {
@@ -288,6 +285,8 @@ public class AutoCreateOrderService {
 
 	public void waitForOtpAndFillIn() {
 		try {
+			String identifierLetter = null; // 英文驗證碼
+			String verificationCode = null; // 數字驗證碼
 			wait.until(ExpectedConditions.presenceOfElementLocated(By.id("Cardinal-ElementContainer")));
 			System.out.println("✅ DOM 中已出現驗證容器");
 			// 等待 iframe 出現
@@ -307,9 +306,10 @@ public class AutoCreateOrderService {
 			System.out.println("📨 等待簡訊驗證碼中...");
 			int retries = 60;
 			while (retries-- > 0) {
-				String identifierLetter = SmsCodeHolder.getIdentifier(); // 英文驗證碼
-				String verificationCode = SmsCodeHolder.getCode(); // 數字驗證碼
-
+				identifierLetter = SmsCodeHolder.getIdentifier(); // 英文驗證碼
+				verificationCode = SmsCodeHolder.getCode(); // 數字驗證碼
+				System.out.println("set英文= " + identifierLetter);
+				System.out.println("set數字= " + verificationCode);
 				if (verificationCode != null && identifierLetter != null) {
 					WebElement radioBtn = wait.until(ExpectedConditions.elementToBeClickable(
 							By.cssSelector("input[name='identifier'][value='" + identifierLetter + "']")));

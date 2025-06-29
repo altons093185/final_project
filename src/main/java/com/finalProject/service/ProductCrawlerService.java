@@ -49,7 +49,7 @@ public class ProductCrawlerService {
 	// 每天早上8點抓一次
 	@Scheduled(cron = "0 0 8 * * ?")
 	@Transactional
-	public void crawlCostcoHotBuys() {
+	public int crawlCostcoHotBuys() {
 
 		int count = 0;
 		System.out.println("🚀 開始 Costco 熱門優惠爬蟲");
@@ -61,13 +61,13 @@ public class ProductCrawlerService {
 		WebDriver driver = new ChromeDriver(options);
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
-		Optional<Category> categoryOpt = categoryRepository.findByNameEn("Household-Baby-Toys");
+		Optional<Category> categoryOpt = categoryRepository.findByNameEn("hot-buys");
 		Category category = categoryOpt.get();
 
 		int page = 0;
 		String url;
 		try {
-			while (page < 4) { // 最多爬取 100 頁
+			while (page < 4) {
 				if (page == 0) {
 //					url = "https://www.costco.com.tw/c/hot-buys";
 //					url = "https://www.costco.com.tw/c/whats-new";
@@ -101,7 +101,25 @@ public class ProductCrawlerService {
 					break;
 				}
 
+				// 前置作業 : 判斷新增或更新 ++
+//				List<String> productIds = new ArrayList<>();
+//				Map<String, Element> itemMap = new HashMap<>();
+//
+//				for (Element item : items) {
+//					String href = item.select("a.js-lister-name").attr("href");
+//					String productId = extractProductId(href);
+//					productIds.add(productId);
+//					itemMap.put(productId, item); // 等會配對資料
+//				}
+//				System.out.println(productIds.size() + " 個商品 ID: " + productIds);
+//
+//				Map<String, Product> existingProducts = productRepository.findAllById(productIds).stream()
+//						.collect(Collectors.toMap(Product::getProductId, Function.identity()));
+
+				// 前置作業 : 判斷新增或更新 --
+
 				for (Element item : items) {
+
 					Product product = new Product();
 
 					upsertProduct(item, product); // 更新商品資訊
@@ -118,12 +136,16 @@ public class ProductCrawlerService {
 				System.out.println("目前商品數量: " + count);
 			}
 
-		} catch (Exception e) {
+		} catch (
+
+		Exception e) {
 			e.printStackTrace();
 		} finally {
 			driver.quit();
 			System.out.println("🚀 爬蟲結束，共抓取 " + count + " 件商品");
+
 		}
+		return count;
 	}
 
 	// 把 "$539"、"商品已折價 $110" → 轉成整數

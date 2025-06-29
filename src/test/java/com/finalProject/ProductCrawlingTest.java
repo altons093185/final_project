@@ -5,28 +5,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.finalProject.repository.ProductRepository;
+import com.finalProject.service.ProductCrawlerService;
 import com.finalProject.service.ProductService;
 
 @SpringBootTest
-public class productTest {
+public class ProductCrawlingTest {
 
 	@Autowired
 	ProductService productService;
 
 	@Autowired
+	ProductCrawlerService productCrawlerService;
+
+	@Autowired
 	ProductRepository productRepository;
 
 	@Test
-	public void shouldFindExistingProductById() {
+	public void UpsertTest() {
+		productCrawlerService.crawlCostcoHotBuys();
 
-//		List<String> productIds = new ArrayList<>();
-//		productIds.add("1010656");
-////		Map<String, Element> productIdToElement = new HashMap<>();
-//
-//		List<Product> existingProducts = productRepository.findByProductIdIn(productIds);
-//
-//		System.out.println(existingProducts);
-//		System.out.println("hi");
 	}
 
 }

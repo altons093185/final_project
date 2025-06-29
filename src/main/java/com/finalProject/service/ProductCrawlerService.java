@@ -61,7 +61,7 @@ public class ProductCrawlerService {
 		WebDriver driver = new ChromeDriver(options);
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
-		Optional<Category> categoryOpt = categoryRepository.findByNameEn("hot-buys");
+		Optional<Category> categoryOpt = categoryRepository.findByNameEn("Food-Dining");
 		Category category = categoryOpt.get();
 
 		int page = 0;

@@ -207,14 +207,14 @@ public class AutoCreateOrderService {
 			// 姓名
 			WebElement nameInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("firstName1")));
 			nameInput.clear();
-			Thread.sleep(400);
+			Thread.sleep(1000);
 			System.out.println(recipientName);
 			nameInput.sendKeys(recipientName);
 
 			// 電話
 			WebElement phoneInput = driver.findElement(By.id("phone1"));
 			phoneInput.clear();
-			Thread.sleep(400);
+			Thread.sleep(1000);
 			phoneInput.sendKeys(recipientPhone);
 
 			// 選擇縣市（新北市 value="2"）
@@ -222,7 +222,7 @@ public class AutoCreateOrderService {
 			System.out.println(parseToCityId);
 			WebElement citySelect = driver.findElement(By.id("city"));
 			Select cityDropdown = new Select(citySelect);
-			Thread.sleep(400);
+			Thread.sleep(1000);
 			cityDropdown.selectByValue(parseToCityId);
 
 			Thread.sleep(1000); // ⏳ 小延遲讓郵遞區號刷新
@@ -232,16 +232,16 @@ public class AutoCreateOrderService {
 			System.out.println(parseToZipCode);
 			WebElement postalSelect = driver.findElement(By.id("postalCode"));
 			Select postalDropdown = new Select(postalSelect);
-			Thread.sleep(400);
+			Thread.sleep(1000);
 			postalDropdown.selectByValue(parseToZipCode);
 
 			// 地址
 			WebElement addressInput = driver.findElement(By.id("homeAddress1"));
 			addressInput.clear();
-			Thread.sleep(400);
+			Thread.sleep(1000);
 			addressInput.sendKeys(recipientAddress);
 
-			Thread.sleep(500); // ⏳ 讓欄位完成填寫
+			Thread.sleep(1000); // ⏳ 讓欄位完成填寫
 
 			// 點擊「儲存地址」
 			WebElement saveButton = wait.until(
@@ -324,6 +324,9 @@ public class AutoCreateOrderService {
 				Thread.sleep(1000);
 			}
 
+			if (verificationCode == null || identifierLetter == null) {
+				throw new RuntimeException("未能在 60 秒內獲取驗證碼");
+			}
 			WebElement sendVerifyCodeBtn = wait
 					.until(ExpectedConditions.elementToBeClickable(By.id("btnVerifySubmit")));
 //			sendVerifyCodeBtn.click();
